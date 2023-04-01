@@ -5,14 +5,18 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import android.widget.ListView;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
 public class LauncherActivity extends AppCompatActivity {
-    static class App implements ListItem {
+    static class App implements ListAdapter.Item {
         public String name;
         public Intent launcherIntent;
 
@@ -22,7 +26,7 @@ public class LauncherActivity extends AppCompatActivity {
         }
 
         @Override
-        public String getText() {
+        public String getLabel() {
             return name;
         }
     }
@@ -30,10 +34,31 @@ public class LauncherActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ListView list = findViewById(R.id.list);
+        RecyclerView list = findViewById(R.id.list);
 
         PackageManager pManager = getPackageManager();
-        ListAdapter<App> appsList = new ListAdapter<>(this);
+        ListAdapter<App> appsList = new ListAdapter<App>(this){
+            @NonNull
+            @Override
+            public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                TextView tv = new TextView(mContext);
+                tv.setPadding(30, 30, 30, 30);
+                tv.setTextSize(20);
+                return new ViewHolder(tv);
+            }
+
+            @Override
+            public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+                TextView item = (TextView) holder.getView();
+                item.setText(mList.get(position).getLabel());
+                item.setOnClickListener(view -> onAction(mList.get(position)));
+            }
+
+            @Override
+            void onAction(App app) {
+                startActivity(app.launcherIntent);
+            }
+        };
         List<ResolveInfo> allApps;
         {
             Intent intent = new Intent(Intent.ACTION_MAIN, null);
@@ -46,10 +71,7 @@ public class LauncherActivity extends AppCompatActivity {
             App app = new App((String) ri.loadLabel(pManager), intent);
             appsList.add(app);
         }
+        list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(appsList);
-        list.setOnItemClickListener((adapterView, view, i, l) -> {
-            App app = (App) adapterView.getAdapter().getItem(i);
-            startActivity(app.launcherIntent);
-        });
     }
 }

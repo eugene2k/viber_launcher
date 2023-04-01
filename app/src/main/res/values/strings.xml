@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Viber Launcher</string>
+    <string name="charge_level_low">Зарядите Телефон!</string>
 </resources>
