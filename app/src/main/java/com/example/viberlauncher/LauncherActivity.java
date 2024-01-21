@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -35,8 +37,8 @@ public class LauncherActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         RecyclerView list = findViewById(R.id.list);
-
         PackageManager pManager = getPackageManager();
+
         ListAdapter<App> appsList = new ListAdapter<App>(this){
             @NonNull
             @Override
@@ -55,7 +57,7 @@ public class LauncherActivity extends AppCompatActivity {
             }
 
             @Override
-            void onAction(App app) {
+            void onAction(@NonNull App app) {
                 startActivity(app.launcherIntent);
             }
         };
@@ -67,11 +69,15 @@ public class LauncherActivity extends AppCompatActivity {
         }
         for (ResolveInfo ri : allApps) {
             Intent intent = pManager.getLaunchIntentForPackage(ri.activityInfo.packageName);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY|Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-            App app = new App((String) ri.loadLabel(pManager), intent);
-            appsList.add(app);
+            if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
+                App app = new App((String) ri.loadLabel(pManager), intent);
+                appsList.add(app);
+            }
         }
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(appsList);
+        ImageView img = findViewById(R.id.imageView);
+        img.setVisibility(View.GONE);
     }
 }

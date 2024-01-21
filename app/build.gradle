@@ -3,15 +3,18 @@ plugins {
 }
 
 android {
+//    lint {
+//        disable.add("ExpiredTargetSdkVersion")
+//    }
     signingConfigs {
         debug {
-            storeFile file('/home/me/android/keys.jks')
+            storeFile file('/home/me/StudioProjects/keys.jks')
             storePassword 'TBonT8Sh'
             keyAlias 'key0'
             keyPassword 'TBonT8Sh'
         }
         release {
-        storeFile file('/home/me/android/keys.jks')
+        storeFile file('/home/me/StudioProjects/keys.jks')
             storePassword 'TBonT8Sh'
             keyAlias 'key0'
             keyPassword 'TBonT8Sh'
@@ -48,8 +51,6 @@ android {
 }
 
 dependencies {
-
-    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
 
