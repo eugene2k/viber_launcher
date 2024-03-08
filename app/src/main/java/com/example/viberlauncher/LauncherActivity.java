@@ -77,7 +77,5 @@ public class LauncherActivity extends AppCompatActivity {
         }
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setAdapter(appsList);
-        ImageView img = findViewById(R.id.imageView);
-        img.setVisibility(View.GONE);
     }
 }

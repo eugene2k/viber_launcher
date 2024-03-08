@@ -11,16 +11,10 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:textAlignment="center"/>
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#FFFFFF"
-        android:importantForAccessibility="no"
-        tools:ignore="ImageContrastCheck" />
+        android:background="#000000"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="26sp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"

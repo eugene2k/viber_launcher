@@ -22,6 +22,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -51,6 +52,33 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    BroadcastReceiver mBatteryLowReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            unregisterReceiver(mBatteryChangedReceiver);
+            TextView header = findViewById(R.id.header);
+            header.setText(context.getString(R.string.charge_level_low));
+            header.setBackgroundColor(getResources().getColor(R.color.crimson));
+        }
+    };
+
+    BroadcastReceiver mBatteryOkayReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            TextView header = findViewById(R.id.header);
+            header.setBackgroundColor(Color.BLACK);
+            registerReceiver(mBatteryChangedReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        }
+    };
+
+    BroadcastReceiver mBatteryChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            TextView header = findViewById(R.id.header);
+            int chargeLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+            header.setText(chargeLevel + "%");
+        }
+    };
     CountDownTimer mTimer;
     CountDownTimer mInactivityTimer;
 
@@ -96,41 +124,24 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-        BroadcastReceiver br = new BroadcastReceiver() {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                TextView header = findViewById(R.id.header);
-                int chargeLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-                header.setText(chargeLevel + "%");
-            }
-        };
-        registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                unregisterReceiver(br);
-                TextView header = findViewById(R.id.header);
-                header.setText(context.getString(R.string.charge_level_low));
-                header.setTextColor(Color.WHITE);
-                header.setTextColor(Color.RED);
-            }
-        }, new IntentFilter(Intent.ACTION_BATTERY_LOW));
+        registerReceiver(mBatteryLowReceiver, new IntentFilter(Intent.ACTION_BATTERY_LOW));
+        registerReceiver(mBatteryOkayReceiver, new IntentFilter(Intent.ACTION_BATTERY_OKAY));
+        registerReceiver(mBatteryChangedReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+    }
 
-        registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                registerReceiver(br, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-            }
-        }, new IntentFilter(Intent.ACTION_BATTERY_OKAY));
-        registerReceiver(br, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        unregisterReceiver(mBatteryLowReceiver);
+        unregisterReceiver(mBatteryOkayReceiver);
+        unregisterReceiver(mBatteryChangedReceiver);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         RecyclerView list = findViewById(R.id.list);
-        ImageView img = findViewById(R.id.imageView);
-        img.setVisibility(View.GONE);
         mInactivityTimer.start();
         if (!canReadContacts()) {
             requestPermission();
@@ -180,9 +191,10 @@ public class MainActivity extends AppCompatActivity {
                 );
                 assert(phoneIcon != null);
                 phoneIcon.setTint(Color.WHITE);
-                CustomButton b = new CustomButton(mContext);
+                ImageButton b = new ImageButton(mContext);
                 b.setPadding(5,5,5,5);
-                b.setDrawable(phoneIcon);
+                b.setImageDrawable(phoneIcon);
+                b.setBackgroundResource(R.drawable.button_background);
                 l.addView(b);
                 l.setGravity(Gravity.CENTER_VERTICAL);
                 l.setPadding(0, 30, 20, 30);
@@ -199,18 +211,16 @@ public class MainActivity extends AppCompatActivity {
                 RelativeLayout layout = (RelativeLayout) holder.getView();
                 TextView item = (TextView) layout.getChildAt(0);
                 item.setText(mList.get(position).getLabel());
-                CustomButton b = (CustomButton) layout.getChildAt(1);
+                ImageButton b = (ImageButton) layout.getChildAt(1);
                 b.setOnClickListener(view -> onAction(mList.get(position)));
             }
 
             @Override
             void onAction(Contact item) {
                 mInactivityTimer.cancel();
-                ImageView img = findViewById(R.id.imageView);
-                img.setVisibility(View.VISIBLE);
                 Intent intent = new Intent(Intent.ACTION_VIEW)
                         .addCategory(Intent.CATEGORY_DEFAULT)
-                        .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                        .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
                         .setDataAndType(Uri.withAppendedPath(ContactsContract.Data.CONTENT_URI, String.valueOf(item.id)),
                                 "vnd.android.cursor.item/vnd.com.viber.voip.viber_number_call");
                 startActivity(intent);
