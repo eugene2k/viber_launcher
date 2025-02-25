@@ -5,9 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -67,10 +65,14 @@ public class LauncherActivity extends AppCompatActivity {
             intent.addCategory(Intent.CATEGORY_LAUNCHER);
             allApps = pManager.queryIntentActivities(intent, 0);
         }
+        {
+            Intent intent = new Intent(getApplicationContext(), AppSettingsActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
+            appsList.add(new App(getString(R.string.app_settings), intent));
+        }
         for (ResolveInfo ri : allApps) {
             Intent intent = pManager.getLaunchIntentForPackage(ri.activityInfo.packageName);
             if (intent != null) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
                 App app = new App((String) ri.loadLabel(pManager), intent);
                 appsList.add(app);
             }

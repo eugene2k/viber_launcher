@@ -8,6 +8,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -18,12 +19,13 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.provider.ContactsContract;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +37,8 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     static class Contact implements ListAdapter.Item {
@@ -76,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             TextView header = findViewById(R.id.header);
             int chargeLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-            header.setText(chargeLevel + "%");
+            header.setText(getString(R.string.charge_level, chargeLevel));
         }
     };
     CountDownTimer mTimer;
@@ -165,6 +169,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setContacts(RecyclerView list) {
+        String filename = getString(R.string.preferences_file);
+        SharedPreferences prefs = getApplicationContext().getSharedPreferences(filename, MODE_PRIVATE);
+        String typeString = prefs.getString("typeString","");
         ContentResolver content = getContentResolver();
 
         String[] projection = new String[]{
@@ -172,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
                 ContactsContract.Data.DISPLAY_NAME,
         };
         String selection = ContactsContract.Data.MIMETYPE + "=?";
-        String[] selectionArgs = {"vnd.android.cursor.item/vnd.com.viber.voip.viber_number_call"};
+        String[] selectionArgs = {typeString};
         Cursor cursor = content.query(ContactsContract.Data.CONTENT_URI,
                 projection, selection, selectionArgs, null);
         ListAdapter<Contact> adapter = new ListAdapter<Contact>(this) {
@@ -198,7 +205,9 @@ public class MainActivity extends AppCompatActivity {
                 l.addView(b);
                 l.setGravity(Gravity.CENTER_VERTICAL);
                 l.setPadding(0, 30, 20, 30);
-                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(150,150);
+                DisplayMetrics metrics = getResources().getDisplayMetrics();
+                int size = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 10.0f, metrics);
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(size,size);
                 params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
                 params.addRule(RelativeLayout.RIGHT_OF, tv.getId());
                 b.setLayoutParams(params);
@@ -222,15 +231,25 @@ public class MainActivity extends AppCompatActivity {
                         .addCategory(Intent.CATEGORY_DEFAULT)
                         .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
                         .setDataAndType(Uri.withAppendedPath(ContactsContract.Data.CONTENT_URI, String.valueOf(item.id)),
-                                "vnd.android.cursor.item/vnd.com.viber.voip.viber_number_call");
+                                typeString);
                 startActivity(intent);
             }
         };
         assert(cursor != null);
         while (cursor.moveToNext()) {
-            int id = cursor.getInt(0);
-            String displayName = cursor.getString(1);
-            adapter.add(new Contact(id, displayName));
+            try {
+                int id = cursor.getInt(0);
+                String displayName = Objects.requireNonNull(cursor.getString(1));
+                adapter.add(new Contact(id, displayName));
+            } catch (Exception e) {
+                StringBuilder msg = new StringBuilder(e.toString());
+                msg.append("\n");
+                for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+                    msg.append(stackTraceElement.toString());
+                    msg.append("\n");
+                }
+                Log.e("ViberLauncher", msg.toString());
+            }
         }
         cursor.close();
         list.setAdapter(adapter);

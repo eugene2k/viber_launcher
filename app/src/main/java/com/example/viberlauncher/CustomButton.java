@@ -9,8 +9,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 import android.graphics.RectF;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+
 import androidx.appcompat.widget.AppCompatTextView;
 
 public class CustomButton extends AppCompatTextView {
@@ -33,11 +32,6 @@ public class CustomButton extends AppCompatTextView {
         shape = Shape.Rectangle;
     }
 
-    public void setDrawable(@Nullable Drawable drawable) {
-        this.drawable = drawable;
-    }
-
-    public void setShape(@NonNull Shape shape) { this.shape = shape; }
     @Override
     protected void onDraw(Canvas canvas) {
         paint.setARGB(255, 72, 191, 83);
