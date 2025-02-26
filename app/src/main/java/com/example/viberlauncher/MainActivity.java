@@ -1,5 +1,8 @@
 package com.example.viberlauncher;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -24,7 +27,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -164,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestPermission() {
-        String[] permissions = {android.Manifest.permission.READ_CONTACTS};
+        String[] permissions = {android.Manifest.permission.READ_CONTACTS, android.Manifest.permission.CALL_PHONE};
         ActivityCompat.requestPermissions(this, permissions, 100);
     }
 
@@ -186,38 +189,52 @@ public class MainActivity extends AppCompatActivity {
             @NonNull
             @Override
             public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                RelativeLayout l = new RelativeLayout(mContext);
-                TextView tv = new TextView(mContext);
-                tv.setPadding(10, 0, 0, 0);
-                tv.setTextSize(20);
-                l.addView(tv);
-                Drawable phoneIcon = ResourcesCompat.getDrawable(
-                        Resources.getSystem(),
-                        android.R.drawable.sym_action_call,
-                        null
-                );
-                assert (phoneIcon != null);
-                phoneIcon.setTint(Color.WHITE);
-                ImageButton b = new ImageButton(mContext);
-                b.setPadding(5, 5, 5, 5);
-                b.setImageDrawable(phoneIcon);
-                b.setBackgroundResource(R.drawable.button_background);
-                l.addView(b);
-                l.setGravity(Gravity.CENTER_VERTICAL);
-                l.setPadding(0, 30, 20, 30);
+                LinearLayout l = new LinearLayout(mContext);
                 DisplayMetrics metrics = getResources().getDisplayMetrics();
-                int size = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 10.0f, metrics);
-                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(size, size);
-                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-                params.addRule(RelativeLayout.RIGHT_OF, tv.getId());
-                b.setLayoutParams(params);
+                int hP = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8.0f, metrics);
+                {
+                    ViewGroup.LayoutParams p = new ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+                    l.setLayoutParams(p);
+                    l.setPadding(0, 30, 0, 30);
+                }
+                {
+                    TextView tv = new TextView(mContext);
+                    tv.setTextSize(18);
+                    LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+                    p.gravity = Gravity.START | Gravity.CENTER_VERTICAL;
+                    p.weight = 1;
+                    p.setMarginStart(hP);
+                    p.setMarginEnd(hP);
+                    tv.setLayoutParams(p);
+                    l.addView(tv);
+                }
+                {
+                    Drawable phoneIcon = ResourcesCompat.getDrawable(
+                            Resources.getSystem(),
+                            android.R.drawable.sym_action_call,
+                            null
+                    );
+                    assert (phoneIcon != null);
+                    phoneIcon.setTint(Color.WHITE);
+                    ImageButton b = new ImageButton(mContext);
+                    b.setImageDrawable(phoneIcon);
+                    b.setBackgroundResource(R.drawable.button_background);
+                    int size = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 10.0f, metrics);
+                    LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(size, size);
+                    p.gravity = Gravity.END | Gravity.CENTER_VERTICAL;
+                    p.weight = 0;
+                    p.setMarginEnd(hP);
+                    p.setMarginStart(hP);
+                    b.setLayoutParams(p);
+                    l.addView(b);
+                }
 
                 return new ViewHolder(l);
             }
 
             @Override
             public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-                RelativeLayout layout = (RelativeLayout) holder.getView();
+                LinearLayout layout = (LinearLayout) holder.getView();
                 TextView item = (TextView) layout.getChildAt(0);
                 item.setText(mList.get(position).getLabel());
                 ImageButton b = (ImageButton) layout.getChildAt(1);
@@ -227,6 +244,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             void onAction(Contact item) {
                 mInactivityTimer.cancel();
+                finish();
                 Intent intent = new Intent(Intent.ACTION_VIEW)
                         .addCategory(Intent.CATEGORY_DEFAULT)
                         .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK)

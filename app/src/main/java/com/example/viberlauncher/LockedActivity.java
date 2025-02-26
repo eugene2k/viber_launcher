@@ -1,5 +1,6 @@
 package com.example.viberlauncher;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -7,11 +8,13 @@ import android.content.IntentFilter;
 
 import java.util.Calendar;
 
+import android.content.pm.PackageManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -57,12 +60,10 @@ public class LockedActivity  extends AppCompatActivity {
         Button b = findViewById(R.id.button);
         b.setOnClickListener(button -> {
             Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
             startActivity(intent);
         });
         b.setBackgroundColor(getResources().getColor(R.color.green));
         b.setText(R.string.make_calls);
-
         setDateTime();
         registerReceiver(mClockTick, new IntentFilter(Intent.ACTION_TIME_TICK));
         registerReceiver(mBatteryLow, new IntentFilter(Intent.ACTION_BATTERY_LOW));
@@ -76,10 +77,13 @@ public class LockedActivity  extends AppCompatActivity {
         TextView clock = findViewById(R.id.clock);
         SimpleDateFormat time_format = new SimpleDateFormat("HH:mm", locale);
         SimpleDateFormat weekday_format = new SimpleDateFormat("EEEE", locale);
-        SimpleDateFormat date_format = new SimpleDateFormat("d MMMM y", locale);
+        SimpleDateFormat date_format = new SimpleDateFormat("d MMMM", locale);
+        SimpleDateFormat year_format = new SimpleDateFormat("y", locale);
         clock.setText(time_format.format(date));
+        TextView yearView = findViewById(R.id.date_year);
         TextView dateView = findViewById(R.id.date);
         TextView weekDayView = findViewById(R.id.weekday);
+        yearView.setText(year_format.format(date));
         weekDayView.setText(weekday_format.format(date).toUpperCase());
         dateView.setText(date_format.format(date).toUpperCase());
     }
