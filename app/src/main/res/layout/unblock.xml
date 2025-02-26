@@ -26,8 +26,6 @@
         android:layout_width="187dp"
         android:layout_height="145dp"
         android:layout_marginBottom="46dp"
-        android:backgroundTint="#42AC00"
-        android:text="ЗВОНИТЬ"
         android:textColor="#FFFFFF"
         android:textSize="24sp"
         android:textStyle="bold"

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Viber Launcher</string>
-    <string name="charge_level_low">Зарядите Телефон!</string>
+    <string name="charge_now">Зарядите Телефон!</string>
+    <string name="make_calls">Звонить</string>
     <string name="charge_level">%1$d%%</string>
     <string name="app_settings">Настройки программы</string>
     <string name="preferences_file">prefs</string>

@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 
 import java.util.Calendar;
 
-import android.graphics.Color;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.widget.Button;
@@ -36,18 +35,19 @@ public class LockedActivity  extends AppCompatActivity {
     BroadcastReceiver mBatteryOkay = new BroadcastReceiver(){
         @Override
         public void onReceive(Context context, Intent intent) {
-            TextView batteryStatus = findViewById(R.id.batteryStatus);
-            batteryStatus.setBackgroundColor(Color.BLACK);
-            registerReceiver(mBatteryChanged, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+            Button b = findViewById(R.id.button);
+            b.setBackgroundColor(getResources().getColor(R.color.green));
+            b.setText(R.string.make_calls);
+            b.setEnabled(true);
         }
     };
     BroadcastReceiver mBatteryLow = new BroadcastReceiver(){
         @Override
         public void onReceive(Context context, Intent intent) {
-            unregisterReceiver(mBatteryChanged);
-            TextView batteryStatus = findViewById(R.id.batteryStatus);
-            batteryStatus.setBackgroundColor(getResources().getColor(R.color.crimson));
-            batteryStatus.setText(R.string.charge_level_low);
+            Button b = findViewById(R.id.button);
+            b.setBackgroundColor(getResources().getColor(R.color.crimson));
+            b.setText(R.string.charge_now);
+            b.setEnabled(false);
         }
     };
     @Override
@@ -60,6 +60,8 @@ public class LockedActivity  extends AppCompatActivity {
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
             startActivity(intent);
         });
+        b.setBackgroundColor(getResources().getColor(R.color.green));
+        b.setText(R.string.make_calls);
 
         setDateTime();
         registerReceiver(mClockTick, new IntentFilter(Intent.ACTION_TIME_TICK));

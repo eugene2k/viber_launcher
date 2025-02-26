@@ -1,7 +1,5 @@
 package com.example.viberlauncher;
 
-//import android.Manifest;
-
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -61,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             unregisterReceiver(mBatteryChangedReceiver);
             TextView header = findViewById(R.id.header);
-            header.setText(context.getString(R.string.charge_level_low));
+            header.setText(context.getString(R.string.charge_now));
             header.setBackgroundColor(getResources().getColor(R.color.crimson));
         }
     };
@@ -92,8 +90,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         RecyclerView list = findViewById(R.id.list);
+
         LinearLayoutManager mgr = new LinearLayoutManager(this);
-        list.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
+        list.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         list.setLayoutManager(mgr);
         mTimer = new CountDownTimer(5000, 10000) {
             public void onTick(long millisUntilFinished) {
@@ -159,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         mInactivityTimer.cancel();
     }
+
     private boolean canReadContacts() {
         return ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED;
     }
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
     public void setContacts(RecyclerView list) {
         String filename = getString(R.string.preferences_file);
         SharedPreferences prefs = getApplicationContext().getSharedPreferences(filename, MODE_PRIVATE);
-        String typeString = prefs.getString("typeString","");
+        String typeString = prefs.getString("typeString", "");
         ContentResolver content = getContentResolver();
 
         String[] projection = new String[]{
@@ -196,18 +196,18 @@ public class MainActivity extends AppCompatActivity {
                         android.R.drawable.sym_action_call,
                         null
                 );
-                assert(phoneIcon != null);
+                assert (phoneIcon != null);
                 phoneIcon.setTint(Color.WHITE);
                 ImageButton b = new ImageButton(mContext);
-                b.setPadding(5,5,5,5);
+                b.setPadding(5, 5, 5, 5);
                 b.setImageDrawable(phoneIcon);
                 b.setBackgroundResource(R.drawable.button_background);
                 l.addView(b);
                 l.setGravity(Gravity.CENTER_VERTICAL);
                 l.setPadding(0, 30, 20, 30);
                 DisplayMetrics metrics = getResources().getDisplayMetrics();
-                int size = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 10.0f, metrics);
-                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(size,size);
+                int size = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 10.0f, metrics);
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(size, size);
                 params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
                 params.addRule(RelativeLayout.RIGHT_OF, tv.getId());
                 b.setLayoutParams(params);
@@ -229,13 +229,13 @@ public class MainActivity extends AppCompatActivity {
                 mInactivityTimer.cancel();
                 Intent intent = new Intent(Intent.ACTION_VIEW)
                         .addCategory(Intent.CATEGORY_DEFAULT)
-                        .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+                        .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
                         .setDataAndType(Uri.withAppendedPath(ContactsContract.Data.CONTENT_URI, String.valueOf(item.id)),
                                 typeString);
                 startActivity(intent);
             }
         };
-        assert(cursor != null);
+        assert (cursor != null);
         while (cursor.moveToNext()) {
             try {
                 int id = cursor.getInt(0);
