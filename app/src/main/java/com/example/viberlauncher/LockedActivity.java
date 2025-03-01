@@ -11,6 +11,9 @@ import java.util.Calendar;
 import android.content.pm.PackageManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -53,15 +56,38 @@ public class LockedActivity  extends AppCompatActivity {
             b.setEnabled(false);
         }
     };
+    CountDownTimer mTimer = new CountDownTimer(5000, 10000) {
+        public void onTick(long millisUntilFinished) {
+
+        }
+
+        public void onFinish() {
+            sendBroadcast(new Intent("com.example.specialaccessibility.LIMITED_MODE_DISABLE"));
+            Intent intent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME);
+            startActivity(intent);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.unblock);
+        TextView status = findViewById(R.id.batteryStatus);
+        status.setOnTouchListener((view, motionEvent) -> {
+            if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                mTimer.start();
+            } else if (motionEvent.getActionMasked() == MotionEvent.ACTION_UP) {
+                mTimer.cancel();
+                view.performClick();
+            }
+            return false;
+        });
         Button b = findViewById(R.id.button);
         b.setOnClickListener(button -> {
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         });
+
         b.setBackgroundColor(getResources().getColor(R.color.green));
         b.setText(R.string.make_calls);
         setDateTime();

@@ -25,6 +25,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
             header.setText(getString(R.string.charge_level, chargeLevel));
         }
     };
-    CountDownTimer mTimer;
+
     CountDownTimer mInactivityTimer;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -97,16 +98,6 @@ public class MainActivity extends AppCompatActivity {
         LinearLayoutManager mgr = new LinearLayoutManager(this);
         list.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         list.setLayoutManager(mgr);
-        mTimer = new CountDownTimer(5000, 10000) {
-            public void onTick(long millisUntilFinished) {
-
-            }
-
-            public void onFinish() {
-                Intent intent = new Intent(MainActivity.this, LauncherActivity.class);
-                startActivity(intent);
-            }
-        };
         mInactivityTimer = new CountDownTimer(10000, 10001) {
             public void onTick(long millisUntilFinished) {
 
@@ -117,13 +108,10 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         };
-
         list.setOnTouchListener((view, motionEvent) -> {
             if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN) {
                 mInactivityTimer.cancel();
-                mTimer.start();
             } else if (motionEvent.getActionMasked() == MotionEvent.ACTION_UP) {
-                mTimer.cancel();
                 view.performClick();
                 mInactivityTimer.start();
             }
@@ -148,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         RecyclerView list = findViewById(R.id.list);
+
         mInactivityTimer.start();
         if (!canReadContacts()) {
             requestPermission();
